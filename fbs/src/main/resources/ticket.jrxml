@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.20.6.final using JasperReports Library version 6.20.6-5c96b6aa8a39ac1dc6b6bea4b81168e16dd39231  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="FlightTicketInvoice" pageWidth="595" pageHeight="842" whenNoDataType="NoPages" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="cfc6425d-7c66-47ff-8509-a7b5387b6969">
+	<field name="name" class="java.lang.String"/>
+	<field name="contact" class="java.lang.String"/>
+	<field name="flight.departureDate" class="java.time.LocalDateTime"/>
+	<field name="flight.departureAirport.airportName" class="java.lang.String"/>
+	<field name="seatsBooked" class="java.lang.Integer"/>
+	<field name="flight.flightId" class="java.lang.Integer"/>
+	<field name="flight.arrivalAirport.airportName" class="java.lang.String"/>
+	<title>
+		<band height="115" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="0" width="555" height="30" uuid="2deb0310-34ca-4aba-a582-85f4a326cd71"/>
+				<textElement textAlignment="Center">
+					<font size="21" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Ticket Invoice]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="60" y="70" width="190" height="45" uuid="a755d15f-47ab-4bd7-9659-9548121a5e45"/>
+				<textElement>
+					<font isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{flight.departureAirport.airportName}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="310" y="70" width="222" height="45" uuid="d8502cdc-f949-41c7-9f22-c6259ac8fb88"/>
+				<textElement>
+					<font isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{flight.arrivalAirport.airportName}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="20" y="70" width="40" height="20" uuid="ea0c32cf-3591-4458-af93-2107ca3e4481"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[From: ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="280" y="70" width="30" height="20" uuid="7d4625dd-45ca-4797-af29-849e80d0ac1f"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[To: ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="20" y="44" width="70" height="20" uuid="680e48fb-c599-454d-98b0-4061497a0636"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Flight Date:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="357" y="44" width="50" height="20" uuid="de9c5b75-da6f-4588-9e69-ac5385063785"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Flight No:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="80" y="45" width="200" height="22" uuid="444ee6a2-b7c9-46b8-9ac1-0714105fc84d"/>
+				<textElement>
+					<font isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{flight.departureDate}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="406" y="45" width="125" height="20" uuid="9157c970-3c59-475a-bc2a-286b58987c1e"/>
+				<textElement>
+					<font isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{flight.flightId}]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<detail>
+		<band height="100" splitType="Stretch">
+			<staticText>
+				<reportElement x="20" y="12" width="100" height="19" uuid="b3e49fe2-4426-4e43-9e55-e1f0cfa790fe"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Passenger Name:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="120" y="14" width="230" height="19" uuid="2bae81b0-1644-438c-9da8-07896fa62664"/>
+				<textElement>
+					<font isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{name}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="360" y="14" width="50" height="20" uuid="c7d7f5a5-a66e-4610-bf79-82071f54cc14"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Contact: ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="20" y="69" width="512" height="31" uuid="c2110bbc-0aa7-45ba-ab1c-b905797a3a7b"/>
+				<textElement textAlignment="Center">
+					<font isBold="false"/>
+				</textElement>
+				<text><![CDATA[Thank you for choosing our airline. We hope you have a pleasant flight! Your satisfaction is our top priority, and we look forward to serving you again on your next journey. Safe travels and have a great day!
+]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="410" y="14" width="144" height="22" uuid="901b80c0-bb95-4eec-ad52-d39906408ca2"/>
+				<textElement>
+					<font isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{contact}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

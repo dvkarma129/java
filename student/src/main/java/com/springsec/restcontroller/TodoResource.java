@@ -32,7 +32,7 @@ public class TodoResource {
 	
 	@GetMapping("/users/{id}/todos")
 //	@PreAuthorize("hasRole('USER') and #username == authentication.name")//recomded
-	@PostAuthorize("returnObject.username =='rin'")//recommnded
+//	@PostAuthorize("returnObject.username =='rin'")//recommnded
 	@RolesAllowed({"ADMIN", "USER"})
 //	@Secured({"ROLE_ADMIN", "ROLE_USER"})
 	public Todo getUserTodos(@PathVariable int id) {

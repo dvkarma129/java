@@ -1,0 +1,355 @@
+package com.demo.resource.security;
+
+import java.io.IOException;
+
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.stereotype.Component;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+@Component
+public class JwtEntryPoint implements AuthenticationEntryPoint {
+
+	@Override
+	public void commence(HttpServletRequest request, HttpServletResponse response,
+			AuthenticationException authException) throws IOException, ServletException {
+		response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Access Denied !! " + authException.getMessage());
+	}
+
+}
+
+==================================
+package com.demo.resource.security;
+
+import java.io.IOException;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+@Component
+public class JwtFilter extends OncePerRequestFilter {
+	
+    @Autowired
+    private JwtHelper jwtHelper;
+
+
+    @Autowired
+    private UserDetailsService userDetailsService;
+
+
+	@Override
+	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+			throws ServletException, IOException {
+
+  String requestHeader = request.getHeader("Authorization");
+  String username = null;
+  String token = null;
+  if (requestHeader != null && requestHeader.startsWith("Bearer")) {
+      token = requestHeader.substring(7);
+      try {
+          username = this.jwtHelper.getUsernameFromToken(token);
+      } catch (IllegalArgumentException e) {
+    	  System.out.println("Illegal Argument while fetching the username !!");
+          e.printStackTrace();
+      } catch (ExpiredJwtException e) {
+    	  System.out.println("Given jwt token is expired !!");
+          e.printStackTrace(); 
+      } catch (MalformedJwtException e) {
+    	  System.out.println("Some changed has done in token !! Invalid Token");
+          e.printStackTrace();
+      } catch (Exception e) {
+          e.printStackTrace();
+
+      }
+  } else {
+	  System.out.println("Invalid Header Value !! ");
+  }
+
+
+  if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+      UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
+      Boolean validateToken = this.jwtHelper.validateToken(token, userDetails);
+      if (validateToken) {
+          UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+          authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+          SecurityContextHolder.getContext().setAuthentication(authentication);
+
+      } else {
+        System.out.println("Validation fails !!");
+      }
+  }
+
+  filterChain.doFilter(request, response);
+
+
+		
+	}
+}
+================================
+package com.demo.resource.security;
+
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Function;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Component;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+
+@Component
+public class JwtHelper {
+
+	public static final long JWT_TOKEN_VALIDITY = 5 * 60 * 60;
+
+	private String secret = "afafasfafafasfasfasfafacasdasfasxASFACASDFACASDFASFASFDAFASFASDAADSCSDFADCVSGCFVADXCcadwavfsfarvf";
+
+	public String getUsernameFromToken(String token) {
+		return getClaimFromToken(token, Claims::getSubject);
+	}
+	
+	public Date getExpirationDateFromToken(String token) {
+		return getClaimFromToken(token, Claims::getExpiration);
+	}
+
+	public <T> T getClaimFromToken(String token, Function<Claims, T> claimsResolver) {
+		final Claims claims = getAllClaimsFromToken(token);
+		return claimsResolver.apply(claims);
+	}
+
+	private Claims getAllClaimsFromToken(String token) {
+	    return Jwts.parserBuilder()
+	            .setSigningKey(secret)
+	            .build()
+	            .parseClaimsJws(token)
+	            .getBody();
+	}
+
+	private Boolean isTokenExpired(String token) {
+		final Date expiration = getExpirationDateFromToken(token);
+		return expiration.before(new Date());
+	}
+
+	public String generateToken(UserDetails userDetails) {
+		Map<String, Object> claims = new HashMap<>();
+		return doGenerateToken(claims, userDetails.getUsername());
+	}
+
+	private String doGenerateToken(Map<String, Object> claims, String subject) {
+		return Jwts.builder().setClaims(claims).setSubject(subject).setIssuedAt(new Date(System.currentTimeMillis()))
+				.setExpiration(new Date(System.currentTimeMillis() + JWT_TOKEN_VALIDITY * 1000))
+				.signWith( SignatureAlgorithm.HS512,secret).compact();
+	}
+
+	public Boolean validateToken(String token, UserDetails userDetails) {
+		final String username = getUsernameFromToken(token);
+		return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+	}
+
+}
+
+================================
+package com.demo.resource.security;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+
+@Getter
+@Setter
+@ToString
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+public class JwtRequest {
+
+	private String username;
+	private String password;
+	
+}
+
+===============================
+package com.demo.resource.security;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+
+@Getter
+@Setter
+@ToString
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+public class JwtResponse {
+
+	private String jwtToken;
+	private String username;
+	
+}
+==========================
+package com.demo.resource.configuration;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+
+@Configuration
+public class MyConfig {
+
+	 @Bean
+	    public UserDetailsService userDetailsService() {
+	        UserDetails userDetails = User.builder().
+	                username("hrishi")
+	                .password(passwordEncoder().encode("warlock")).roles("ADMIN").
+	                build();
+	        return new InMemoryUserDetailsManager(userDetails);
+	    }
+
+	    @Bean
+	    public PasswordEncoder passwordEncoder() {
+	        return new BCryptPasswordEncoder();
+	    }
+
+	    @Bean
+	    public AuthenticationManager authenticationManager(AuthenticationConfiguration builder) throws Exception {
+	        return builder.getAuthenticationManager();
+	    }
+}
+=================================
+package com.demo.resource.configuration;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import com.demo.resource.security.JwtEntryPoint;
+import com.demo.resource.security.JwtFilter;
+import jakarta.servlet.Filter;
+
+@Configuration
+public class SecurityConfig {
+
+	@Autowired
+	private JwtFilter jwtfilter;
+	
+	@Autowired
+	private JwtEntryPoint entrypoint;
+	
+	   @Bean
+	    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+
+	        http.csrf(csrf -> csrf.disable())
+	        .cors(cors -> cors.disable())
+	        .authorizeHttpRequests(auth->auth.requestMatchers("/api/roles/**").authenticated()
+	        		.requestMatchers("/api/users/**").authenticated()
+	        .requestMatchers("/auth/login").permitAll()
+	        )
+	                .exceptionHandling(ex -> ex.authenticationEntryPoint(entrypoint))
+	                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+	        http.addFilterBefore(jwtfilter, UsernamePasswordAuthenticationFilter.class);
+	        return http.build();
+	    }
+	
+
+}
+
+========================================
+package com.demo.resource.controllers;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.demo.resource.security.JwtHelper;
+import com.demo.resource.security.JwtRequest;
+import com.demo.resource.security.JwtResponse;
+
+@RestController
+@RequestMapping("/auth")
+public class JwtController {
+
+    @Autowired
+    private UserDetailsService userDetailsService;
+
+    @Autowired
+    private AuthenticationManager manager;
+
+    @Autowired
+    private JwtHelper jwthelper;
+
+    @PostMapping("/login")
+    public ResponseEntity<JwtResponse> login(@RequestBody JwtRequest request) {
+
+        this.doAuthenticate(request.getUsername(), request.getPassword());
+        UserDetails userDetails = userDetailsService.loadUserByUsername(request.getUsername());
+        String token = this.jwthelper.generateToken(userDetails);
+
+        JwtResponse response = JwtResponse.builder()
+                .jwtToken(token)
+                .username(userDetails.getUsername()).build();
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    private void doAuthenticate(String email, String password) {
+
+        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(email, password);
+        try {
+            manager.authenticate(authentication);
+
+
+        } catch (BadCredentialsException e) {
+            throw new BadCredentialsException(" Invalid Username or Password  !!");
+        }
+
+    }
+
+}

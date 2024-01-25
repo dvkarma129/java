@@ -23,7 +23,6 @@ import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import com.springsec.repo.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -34,60 +33,32 @@ import static org.springframework.security.config.Customizer.withDefaults;
 @RequiredArgsConstructor
 public class BasicAuthSecurityConfiguration {
 	
-	 private final UserRepository userRepository;
 	 private DataSource dataSource;
 	@Bean
 	public PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
 	}
 
-//	@Bean
-//	public UserDetailsService userDetailsService() {
-//		UserDetails adminDetails = User.builder()
-//				.username("admin")
-//				.password(passwordEncoder()
-//						.encode("1234"))
-//				.roles("ADMIN")
-//				.build();
-//
-//		UserDetails userDetails = User.builder()
-//				.username("user")
-//				.password(passwordEncoder()
-//						.encode("1234"))
-//				.roles("USER")
-//				.build();
-//		return new InMemoryUserDetailsManager(adminDetails, userDetails);
-//	}
-
 	@Bean
 	public UserDetailsService userDetailsService() {
-        JdbcUserDetailsManager userDetailsManager = new JdbcUserDetailsManager();
-        userDetailsManager.setDataSource(dataSource);  // Assuming you have a DataSource bean defined
+		UserDetails adminDetails = User.builder()
+				.username("admin")
+				.password(passwordEncoder().encode("1234"))
+				.roles("ADMIN")
+				.build();
 
-        // Load users from the database
-        userRepository.findAll().forEach(user -> {
-            userDetailsManager.createUser(
-                org.springframework.security.core.userdetails.User
-                    .withUsername(user.getUsername())
-                    .password(user.getPassword())
-                    .roles(user.getRoles().toArray(new String[0]))
-                    .accountExpired(!user.isEnabled())
-                    .accountLocked(!user.isEnabled())
-                    .credentialsExpired(!user.isEnabled())
-                    .disabled(!user.isEnabled())
-                    .build()
-            );
-        });
-
-        return userDetailsManager;
-    }
+		UserDetails userDetails = User.builder()
+				.username("user")
+				.password(passwordEncoder().encode("1234"))
+				.roles("USER")
+				.build();
+		return new InMemoryUserDetailsManager(adminDetails, userDetails);
+	}
 	
 	@Bean
 	SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
-		http.authorizeHttpRequests(auth -> {
-			auth.anyRequest().authenticated();
-		});
+		http.authorizeHttpRequests(auth -> {auth.anyRequest().authenticated();});
 
 		http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 		http.httpBasic(withDefaults());

@@ -1,0 +1,231 @@
+Handling exceptions in a Spring Boot REST API for an employee management system is crucial for providing a good user experience and ensuring that the API responds appropriately to various scenarios. Here are some common exceptions that you might want to handle in your Spring Boot REST API for an employee management system:
+
+1. **Resource Not Found Exception:**
+   - Handle situations where a requested resource (e.g., employee) is not found.
+   - Example: `EmployeeNotFoundException`
+
+2. **Invalid Input Exception:**
+   - Handle cases where the client provides invalid or malformed input data.
+   - Example: `InvalidInputException`
+
+3. **Duplicate Resource Exception:**
+   - Handle attempts to create a resource (e.g., employee) with a unique constraint violation.
+   - Example: `DuplicateEmployeeException`
+
+4. **Authentication Exception:**
+   - Handle authentication-related issues, such as invalid credentials.
+   - Example: `AuthenticationException`
+
+5. **Authorization Exception:**
+   - Handle cases where a user is not authorized to perform a specific action.
+   - Example: `AuthorizationException`
+
+6. **Method Argument Not Valid Exception:**
+   - Handle validation errors on method arguments, such as request body validation.
+   - Example: `MethodArgumentNotValidException`
+
+7. **Data Integrity Violation Exception:**
+   - Handle situations where there is a violation of data integrity constraints.
+   - Example: `DataIntegrityViolationException`
+
+8. **Unsupported Media Type Exception:**
+   - Handle cases where the client sends a request with an unsupported media type.
+   - Example: `UnsupportedMediaTypeException`
+
+9. **Internal Server Error:**
+   - Handle unexpected server errors.
+   - Example: `InternalServerErrorException`
+
+10. **Custom Business Rule Violation Exception:**
+    - If your application has specific business rules that can be violated, create custom exceptions to handle these cases.
+    - Example: `EmployeeNotActiveException`
+
+In Spring Boot, you can handle exceptions using the `@ExceptionHandler` annotation on methods within a `@ControllerAdvice` class. For example:
+
+```java
+@ControllerAdvice
+public class RestExceptionHandler {
+
+    @ExceptionHandler(EmployeeNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ResponseEntity<String> handleEmployeeNotFoundException(EmployeeNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    }
+
+    // Handle other exceptions...
+
+    @ExceptionHandler(Exception.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ResponseEntity<String> handleException(Exception ex) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal Server Error");
+    }
+}
+```
+
+In this example, `@ControllerAdvice` is used to define a global exception handler, and `@ExceptionHandler` methods handle specific exceptions. Customize the exception handling logic based on your application's requirements and the types of exceptions you expect.
+
+
+
+
+Sure, I'll provide you with simple examples of the exceptions mentioned. Note that these are basic examples, and you may want to customize them further based on your specific requirements and use case. Also, make sure to include proper error messages and additional information in your exceptions as needed.
+
+1. **EmployeeNotFoundException:**
+   ```java
+   public class EmployeeNotFoundException extends RuntimeException {
+       public EmployeeNotFoundException(String message) {
+           super(message);
+       }
+   }
+   ```
+
+2. **InvalidInputException:**
+   ```java
+   public class InvalidInputException extends RuntimeException {
+       public InvalidInputException(String message) {
+           super(message);
+       }
+   }
+   ```
+
+3. **DuplicateEmployeeException:**
+   ```java
+   public class DuplicateEmployeeException extends RuntimeException {
+       public DuplicateEmployeeException(String message) {
+           super(message);
+       }
+   }
+   ```
+
+4. **AuthenticationException:**
+   ```java
+   public class AuthenticationException extends RuntimeException {
+       public AuthenticationException(String message) {
+           super(message);
+       }
+   }
+   ```
+
+5. **AuthorizationException:**
+   ```java
+   public class AuthorizationException extends RuntimeException {
+       public AuthorizationException(String message) {
+           super(message);
+       }
+   }
+   ```
+
+6. **MethodArgumentNotValidException:**
+   ```java
+   public class MethodArgumentNotValidException extends RuntimeException {
+       public MethodArgumentNotValidException(String message) {
+           super(message);
+       }
+   }
+   ```
+
+7. **DataIntegrityViolationException:**
+   ```java
+   public class DataIntegrityViolationException extends RuntimeException {
+       public DataIntegrityViolationException(String message) {
+           super(message);
+       }
+   }
+   ```
+
+8. **UnsupportedMediaTypeException:**
+   ```java
+   public class UnsupportedMediaTypeException extends RuntimeException {
+       public UnsupportedMediaTypeException(String message) {
+           super(message);
+       }
+   }
+   ```
+
+9. **InternalServerErrorException:**
+   ```java
+   public class InternalServerErrorException extends RuntimeException {
+       public InternalServerErrorException(String message) {
+           super(message);
+       }
+   }
+   ```
+
+10. **EmployeeNotActiveException (Custom Business Rule Violation):**
+   ```java
+   public class EmployeeNotActiveException extends RuntimeException {
+       public EmployeeNotActiveException(String message) {
+           super(message);
+       }
+   }
+   ```
+
+Feel free to customize these classes based on your specific needs. Ensure that they provide meaningful error messages and any necessary additional information for debugging or handling by the client application.
+
+
+
+To handle these exception classes in a Spring Boot application, you can use the `@ControllerAdvice` annotation along with `@ExceptionHandler` methods. Here's an example `RestExceptionHandler` class that handles the exceptions you've created:
+
+```java
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+
+@ControllerAdvice
+public class RestExceptionHandler {
+
+    @ExceptionHandler(EmployeeNotFoundException.class)
+    public ResponseEntity<String> handleEmployeeNotFoundException(EmployeeNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(InvalidInputException.class)
+    public ResponseEntity<String> handleInvalidInputException(InvalidInputException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(DuplicateEmployeeException.class)
+    public ResponseEntity<String> handleDuplicateEmployeeException(DuplicateEmployeeException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<String> handleAuthenticationException(AuthenticationException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(AuthorizationException.class)
+    public ResponseEntity<String> handleAuthorizationException(AuthorizationException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<String> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<String> handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(UnsupportedMediaTypeException.class)
+    public ResponseEntity<String> handleUnsupportedMediaTypeException(UnsupportedMediaTypeException ex) {
+        return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(InternalServerErrorException.class)
+    public ResponseEntity<String> handleInternalServerErrorException(InternalServerErrorException ex) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(EmployeeNotActiveException.class)
+    public ResponseEntity<String> handleEmployeeNotActiveException(EmployeeNotActiveException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+    }
+}
+```
+
+This `RestExceptionHandler` class is annotated with `@ControllerAdvice`, which allows it to globally handle exceptions thrown by controllers. Each `@ExceptionHandler` method handles a specific exception class and returns an appropriate HTTP status code along with a meaningful error message.
+
+You can customize the response entity (status code, headers, body, etc.) based on your specific requirements. Additionally, consider logging the exceptions for debugging purposes.

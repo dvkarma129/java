@@ -1,6 +1,10 @@
 package com.empmngt.dto;
 
 import java.time.LocalDate;
+import java.util.Collection;
+
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import com.empmngt.config.CustomDepartmentSerializer;
 import com.fasterxml.jackson.annotation.JsonBackReference;
@@ -30,7 +34,7 @@ import lombok.Data;
 @Table(name = "Employee")
 @Data
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
-public class EmpDto {
+public class EmpDto implements UserDetails{
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -46,8 +50,10 @@ public class EmpDto {
 
 	@Email(message = "Email should be valid")
 	@NotBlank(message = "Email cannot be blank")
-	@Column(nullable = false, unique = true)
+	@Column(nullable = true, unique = true)
 	private String email;
+	
+	private String password;
 
 	@Size(max = 10, message = "Phone number is not valid")
 	private String phoneNumber;
@@ -71,4 +77,40 @@ public class EmpDto {
 	@JoinColumn(name = "department_id", referencedColumnName = "department_id")
 	@JsonSerialize(using = CustomDepartmentSerializer.class)
 	public DeptDto department;
+
+	@Override
+	public Collection<? extends GrantedAuthority> getAuthorities() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getUsername() {
+		// TODO Auto-generated method stub
+		return email;
+	}
+
+	@Override
+	public boolean isAccountNonExpired() {
+		// TODO Auto-generated method stub
+		return true;
+	}
+
+	@Override
+	public boolean isAccountNonLocked() {
+		// TODO Auto-generated method stub
+		return true;
+	}
+
+	@Override
+	public boolean isCredentialsNonExpired() {
+		// TODO Auto-generated method stub
+		return true;
+	}
+
+	@Override
+	public boolean isEnabled() {
+		// TODO Auto-generated method stub
+		return true;
+	}
 }

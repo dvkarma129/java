@@ -53,15 +53,15 @@ public class JwtSecurityConfiguration {
 		return http.build();
 	}
 
-	@Bean
-	public UserDetailsService userDetailsService() {
-		UserDetails adminDetails = User.builder().username("admin").password(passwordEncoder().encode("1234"))
-				.roles("ADMIN").build();
-
-		UserDetails userDetails = User.builder().username("user").password(passwordEncoder().encode("1234"))
-				.roles("USER").build();
-		return new InMemoryUserDetailsManager(adminDetails, userDetails);
-	}
+//	@Bean
+//	public UserDetailsService userDetailsService() {
+//		UserDetails adminDetails = User.builder().username("admin").password(passwordEncoder().encode("1234"))
+//				.roles("ADMIN").build();
+//
+//		UserDetails userDetails = User.builder().username("user").password(passwordEncoder().encode("1234"))
+//				.roles("USER").build();
+//		return new InMemoryUserDetailsManager(adminDetails, userDetails);
+//	}
 
 	@Bean
 	BCryptPasswordEncoder passwordEncoder() {

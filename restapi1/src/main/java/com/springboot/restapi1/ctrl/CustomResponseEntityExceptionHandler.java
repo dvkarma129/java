@@ -22,6 +22,4 @@ public class CustomResponseEntityExceptionHandler extends ResponseEntityExceptio
 		UserNotFound userNotFound = new UserNotFound(LocalDate.now(), ex.getMessage(), request.getDescription(false));
 				return new ResponseEntity<UserNotFound>(userNotFound, HttpStatus.NOT_FOUND);
 	}
-
-	
 }
